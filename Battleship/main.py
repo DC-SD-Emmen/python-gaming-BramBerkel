@@ -19,6 +19,8 @@ BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
+highscores = [17, 50, 45, 100, 33, 44, 66]
+
 default = 0
 hiddenArray = [[default for i in range(10)] for j in range(10)]
 
@@ -82,19 +84,23 @@ def arraygrid():
 
 
 buttons = []
+
+
 def resetGrid():
     global buttons, hiddenArray
     buttons = []
     hiddenArray = arraygrid()
 
-def drawgrid(grid):
+
+def drawgrid():
     for row in range(GRID_HEIGHT):
         for col in range(GRID_WIDTH):
-            color = (255, 255, 255) # if not grid[row][col] else (0, 255, 0)
+            color = (255, 255, 255)  # if not grid[row][col] else (0, 255, 0)
             button = pygame.draw.rect(window, color, (col * GRID_SIZE, row * GRID_SIZE, GRID_SIZE, GRID_SIZE))
             pygame.draw.rect(window, (0, 0, 0), (col * GRID_SIZE, row * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
             buttons.append(button)
     pygame.display.update()
+
 
 def main(screen):
     global current_screen
@@ -105,6 +111,10 @@ def main(screen):
     elif screen == "play":
         current_screen = "play"
         play()
+    elif screen == "score":
+        current_screen = "score"
+        highscore()
+
 
 def mainmenu():
     # while current_screen == "main":
@@ -113,7 +123,7 @@ def mainmenu():
     titlebox = pygame.Rect(0, 50, 750, 200)
     pygame.draw.rect(window, BLUE, titlebox)
     titletext = titlefont.render("Battleship", True, RED)
-    titlerect = titletext.get_rect(center=(titlebox.center))
+    titlerect = titletext.get_rect(center=titlebox.center)
     window.blit(titletext, titlerect)
 
     playbutton = pygame.Rect(275, 350, 200, 50)
@@ -121,6 +131,12 @@ def mainmenu():
     playtext = font.render("Play", True, WHITE)
     playtextrect = playtext.get_rect(center=playbutton.center)
     window.blit(playtext, playtextrect)
+
+    scorebutton = pygame.Rect(275, 450, 200, 50)
+    pygame.draw.rect(window, BLACK, scorebutton)
+    scoretext = font.render("High Scores", True, WHITE)
+    scoretextrect = scoretext.get_rect(center=scorebutton.center)
+    window.blit(scoretext, scoretextrect)
 
     running = True
     while running:
@@ -134,8 +150,65 @@ def mainmenu():
                     if playbutton.collidepoint(mousepos):
                         main("play")
                         return
+                    elif scorebutton.collidepoint(mousepos):
+                        main("score")
+                        return
 
         pygame.display.update()
+
+
+def highscore():
+    window.fill(WHITE)
+    displaybar = pygame.Rect(0, 50, 750, 200)
+    pygame.draw.rect(window, BLUE, displaybar)
+    screentext = titlefont.render("High Scores", True, RED)
+    screenrect = screentext.get_rect(center=displaybar.center)
+    window.blit(screentext, screenrect)
+
+    distanceLeft = 50
+    distanceTop = 300
+    highscores.sort()
+    for score in highscores:
+        scoreList = pygame.Rect(distanceLeft, distanceTop, 280, 100)
+        pygame.draw.rect(window, BLACK,scoreList)
+        highscoreText = font.render(str(score), True, WHITE)
+        highscoreRect = highscoreText.get_rect(center=scoreList.center)
+        window.blit(highscoreText, highscoreRect)
+        if distanceTop > 650:
+            if distanceLeft == 50:
+                distanceLeft = 400
+                distanceTop = 150
+            else:
+                break
+        distanceTop = distanceTop + 150
+
+    # height = 0
+    # distancetop = 300 + (110 * height)
+    # distanceleft = 10
+    # for count in highscores:
+    #     scoreblock = pygame.Rect(distanceleft, distancetop, 355, 100)
+    #     pygame.draw.rect(window, BLACK, scoreblock)
+    #     genscore = str(count)
+    #     scoretext = font.render(genscore, True, WHITE)
+    #     scorerect = screentext.get_rect(center=scoreblock.center)
+    #     window.blit(scoretext, scorerect)
+    #     if distanceleft == 10:
+    #         distanceleft = 385
+    #     else:
+    #         distanceleft = 10
+    #         height += 1
+
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if pygame.mouse.get_pressed()[0]:
+                    main("main")
+                    return
+        pygame.display.flip()
 
 
 def play():
@@ -144,7 +217,7 @@ def play():
 
     # Draw shapes
     window.fill(WHITE)
-    drawgrid(grid)
+    drawgrid()
     hiddenArray = arraygrid()
     clickcount = 0
     correctcount = 0
@@ -188,6 +261,7 @@ def play():
                         scorerect = scoretext.get_rect(center=scoredisplay.center)
                         window.blit(scoretext, scorerect)
                         showingscore = 1
+                        highscores.append(clickcount)
 
                         # playbutton = pygame.Rect(300, 250, 175, 50)
                         # pygame.draw.rect(window, BLACK, playbutton)
